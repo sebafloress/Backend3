@@ -4,21 +4,39 @@ import { UserService, PetService } from '../services/index.js';
 
 const router = Router();
 
-// ✅ GET: /api/mocks/mockingusers → solo devuelve 50 usuarios mock
+/**
+ * Endpoint que genera usuarios mock y permite definir la cantidad vía query (?count=10)
+ */
 router.get('/mockingusers', async (req, res) => {
   try {
-    const users = generateMockUsers(50);
+    const count = parseInt(req.query.count) || 50;
+    const users = generateMockUsers(count);
     res.json({ status: 'success', payload: users });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
 
-// 🟨 POST: /api/mocks/generateData → crea y guarda usuarios y mascotas
+/**
+ * Nuevo endpoint que genera mascotas mock (no guarda en DB)
+ */
+router.get('/mockingpets', async (req, res) => {
+  try {
+    const count = parseInt(req.query.count) || 50;
+    const pets = generateMockPets(count);
+    res.json({ status: 'success', payload: pets });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+/**
+ * Endpoint para guardar usuarios y mascotas mock en la base de datos
+ */
 router.post('/generateData', async (req, res) => {
   try {
     const { users = 0, pets = 0 } = req.body;
-    
+
     const mockUsers = users > 0 ? generateMockUsers(users) : [];
     const mockPets = pets > 0 ? generateMockPets(pets) : [];
 

@@ -1,28 +1,21 @@
-import express from 'express';
-import cors from 'cors';
-import { connectDB } from './config/database.js';
-import { errorHandler } from './middlewares/errorHandler.js';
-import mocksRouter from './routes/mocks.routes.js';
-import usersRouter from './routes/users.routes.js';
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+import { connectDB } from "./config/mongoDb.config.js";
+import router from "./common/router.js";
+import { customError } from "./common/errors/customError.js";
+import swaggerUiExpress from "swagger-ui-express";
+import { swaggerOptions } from "./config/swagger.config.js";
 
 const app = express();
+connectDB();
 
-// Middlewares
-app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use("/api", router);
+app.use("/api-docs", swaggerUiExpress.serve, swaggerUiExpress.setup(swaggerOptions));
+app.use(customError);
 
-// Database
-await connectDB();
-
-// Routes
-app.use('/api/mocks', mocksRouter); // ✅ Este es el que importa en este paso
-app.use('/api/users', usersRouter);
-
-// Health Check
-app.get('/ping', (req, res) => res.send('pong'));
-
-// Error Handling
-app.use(errorHandler);
-
-export default app;
+app.listen(process.env.PORT, () => {
+  console.log(`Servidor en puerto ${process.env.PORT}`);
+});
